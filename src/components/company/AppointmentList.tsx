@@ -1,5 +1,5 @@
 import React from 'react';
-import { Appointment, Service } from '../../types';
+import { Appointment, Service, AppointmentStatus } from '../../types';
 import { Clock, Calendar, User, Mail, Phone, FileText } from 'lucide-react';
 import Button from '../common/Button';
 
@@ -32,11 +32,11 @@ const AppointmentList: React.FC<AppointmentListProps> = ({
   // Get status class for styling
   const getStatusClass = (status: Appointment['status']) => {
     switch (status) {
-      case 'confirmed':
+      case AppointmentStatus.Confirmed:
         return 'bg-green-100 text-green-800';
-      case 'cancelled':
+      case AppointmentStatus.CancelledByAdmin:
         return 'bg-red-100 text-red-800';
-      case 'pending':
+      case AppointmentStatus.Pending:
       default:
         return 'bg-amber-100 text-amber-800';
     }

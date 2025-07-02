@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import Button from '../common/Button';
 import { Service, TimeSlot } from '../../types';
+const API_URL = import.meta.env.VITE_API_URL;
 // import { useAppointmentContext } from '../../context/AppointmentContext';
 
 interface AppointmentFormProps {
@@ -104,7 +105,7 @@ const AppointmentForm: React.FC<AppointmentFormProps> = ({
   setIsSubmitting(true);
 
   try {
-    await fetch('http://localhost:3001/appointments', {
+    await fetch(`${API_URL}/appointments`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({

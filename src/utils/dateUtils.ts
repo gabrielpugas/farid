@@ -21,7 +21,7 @@ export const formatTime = (time: string): string => {
  */
 export const getDatesInMonth = (year: number, month: number): Date[] => {
   const dates: Date[] = [];
-  const firstDay = new Date(year, month, 1);
+  // const firstDay = new Date(year, month, 1);
   const lastDay = new Date(year, month + 1, 0);
   
   for (let day = 1; day <= lastDay.getDate(); day++) {
@@ -110,7 +110,7 @@ export const generateTimeSlots = (
   const endDate = new Date(date);
   endDate.setHours(closeHour, closeMinute, 0, 0);
   
-  let currentSlot = new Date(startDate);
+  const currentSlot = new Date(startDate);
   
   while (currentSlot < endDate) {
     const startTime = new Date(currentSlot);
