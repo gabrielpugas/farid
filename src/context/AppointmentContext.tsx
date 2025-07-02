@@ -3,6 +3,7 @@ import { Appointment, Service, BusinessHours, TimeSlot, AppointmentStatus } from
 // import * as storage from '../utils/storage';
 import { generateTimeSlots } from '../utils/dateUtils';
 import { BusinessHoursResponse } from '../types';
+const API_URL = import.meta.env.VITE_API_URL;
 
 
 interface AppointmentContextType {
@@ -51,7 +52,7 @@ export const AppointmentProvider: React.FC<AppointmentProviderProps> = ({ childr
   //   setBusinessHours(storedBusinessHours);
   // }, []);
   useEffect(() => {
-  fetch('http://localhost:3001/business-hours')
+  fetch(`${API_URL}/business-hours`)
   .then(res => res.json())
   .then(data => {
   const mapped = data.map((item: BusinessHoursResponse) => ({
@@ -68,7 +69,7 @@ export const AppointmentProvider: React.FC<AppointmentProviderProps> = ({ childr
   });
 
   // Serviços vindos da API
-  fetch('http://localhost:3001/services')
+  fetch(`${API_URL}/services`)
     .then(res => res.json())
     .then(data => setServices(data))
     .catch(err => {
@@ -77,7 +78,7 @@ export const AppointmentProvider: React.FC<AppointmentProviderProps> = ({ childr
     });
 
   // Agendamentos vindos da API
-  fetch('http://localhost:3001/appointments')
+  fetch(`${API_URL}/appointments`)
     .then(res => res.json())
     .then(data => setAppointments(data))
     .catch(err => {
@@ -163,7 +164,7 @@ export const AppointmentProvider: React.FC<AppointmentProviderProps> = ({ childr
   // }, []);
   const addAppointment = useCallback(async (appointmentData: Omit<Appointment, 'id' | 'createdAt' | 'updatedAt'>) => {
   try {
-    const response = await fetch('http://localhost:3001/appointments', {
+    const response = await fetch(`${API_URL}/appointments`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(appointmentData)
@@ -188,7 +189,7 @@ export const AppointmentProvider: React.FC<AppointmentProviderProps> = ({ childr
   // }, []);
   const updateAppointment = useCallback(async (appointment: Appointment) => {
   try {
-    const response = await fetch(`http://localhost:3001/appointments/${appointment.id}`, {
+    const response = await fetch(`${API_URL}/appointments/${appointment.id}`, {
       method: 'PUT',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(appointment)
@@ -262,7 +263,7 @@ export const AppointmentProvider: React.FC<AppointmentProviderProps> = ({ childr
 
   const addService = useCallback(async (serviceData: Omit<Service, 'id'>) => {
   try {
-    const response = await fetch('http://localhost:3001/services', {
+    const response = await fetch(`${API_URL}/services`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(serviceData)
@@ -286,7 +287,7 @@ export const AppointmentProvider: React.FC<AppointmentProviderProps> = ({ childr
   // }, []);
   const updateService = useCallback(async (service: Service) => {
   try {
-    const response = await fetch(`http://localhost:3001/services/${service.id}`, {
+    const response = await fetch(`${API_URL}/services/${service.id}`, {
       method: 'PUT',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(service)
@@ -311,7 +312,7 @@ export const AppointmentProvider: React.FC<AppointmentProviderProps> = ({ childr
   // }, []);
   const removeService = useCallback(async (id: string) => {
   try {
-    const response = await fetch(`http://localhost:3001/services/${id}`, {
+    const response = await fetch(`${API_URL}/services/${id}`, {
       method: 'DELETE'
     });
 
@@ -333,7 +334,7 @@ export const AppointmentProvider: React.FC<AppointmentProviderProps> = ({ childr
   // }, []);
   const updateBusinessHours = useCallback(async (hours: BusinessHours[]) => {
   try {
-    const response = await fetch('http://localhost:3001/business-hours', {
+    const response = await fetch(`${API_URL}/appointments`, {
       method: 'PUT',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(hours)
