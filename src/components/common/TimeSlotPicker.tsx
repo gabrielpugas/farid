@@ -13,13 +13,22 @@ const TimeSlotPicker: React.FC<TimeSlotPickerProps> = ({
   onSelectTimeSlot
 }) => {
   // Format time from ISO string to readable format
+  // const formatTime = (isoTime: string) => {
+  //   const date = new Date(isoTime);
+  //   return date.toLocaleTimeString('en-US', {
+  //     hour: 'numeric',
+  //     minute: '2-digit',
+  //     hour12: true
+  //   });
+  // };
   const formatTime = (isoTime: string) => {
-    const date = new Date(isoTime);
-    return date.toLocaleTimeString('en-US', {
-      hour: 'numeric',
-      minute: '2-digit',
-      hour12: true
-    });
+  const date = new Date(isoTime);
+  return date.toLocaleTimeString('pt-BR', {
+    hour: '2-digit',
+    minute: '2-digit',
+    hour12: false,
+    timeZone: 'America/Sao_Paulo'
+  });
   };
 
   // Group time slots by morning, afternoon, evening
