@@ -1,7 +1,7 @@
 import React, { createContext, useState, useEffect, useCallback, ReactNode } from 'react';
 import { Appointment, Service, BusinessHours, TimeSlot, AppointmentStatus } from '../types';
 // import * as storage from '../utils/storage';
-import { generateTimeSlots } from '../utils/dateUtils';
+// import { generateTimeSlots } from '../utils/dateUtils';
 import { BusinessHoursResponse } from '../types';
 const API_URL = import.meta.env.VITE_API_URL;
 
@@ -89,65 +89,91 @@ export const AppointmentProvider: React.FC<AppointmentProviderProps> = ({ childr
 
   // Calculate available time slots whenever selectedDate or selectedService changes
   const refreshAvailableTimeSlots = useCallback(() => {
-    if (!selectedDate) return;
-    
-    const dayOfWeek = selectedDate.getDay();
-    const daySettings = businessHours.find(h => h.dayOfWeek === dayOfWeek);
-    
-    if (!daySettings || !daySettings.isOpen) {
+  if (!selectedDate || !selectedService) return;
+
+  const dateStr = selectedDate.toISOString().split('T')[0];
+  const serviceId = selectedService.id;
+
+  fetch(`${API_URL}/available-times?date=${dateStr}&service_id=${serviceId}`)
+    .then(res => {
+      if (!res.ok) throw new Error('Erro ao buscar horários disponíveis');
+      return res.json();
+    })
+    .then((data: { startTime: string; endTime: string }[]) => {
+      const formattedSlots = data.map((slot, index) => ({
+        id: `${slot.startTime}_${index}`,
+        startTime: slot.startTime,
+        endTime: slot.endTime,
+        isAvailable: true
+      }));
+      setAvailableTimeSlots(formattedSlots);
+    })
+    .catch(err => {
+      console.error('Erro ao carregar horários disponíveis:', err);
       setAvailableTimeSlots([]);
-      return;
-    }
-    
-    // Generate all possible time slots for the day
-    const duration = selectedService ? selectedService.duration : 30; // default to 30 minutes if no service selected
-    const allTimeSlots = generateTimeSlots(
-      selectedDate,
-      daySettings.openTime,
-      daySettings.closeTime,
-      duration
-    );
-    
-    // Filter out slots that overlap with existing appointments
-    const dateStr = selectedDate.toISOString().split('T')[0];
-    // const appointmentsOnDate = appointments.filter(
-    //   a => a.date.split('T')[0] === dateStr && a.status !== AppointmentStatus.CancelledByAdmin
-    // );
-    const appointmentsOnDate = appointments.filter(
-  a =>
-    a.date.split('T')[0] === dateStr &&
-    ![
-      AppointmentStatus.CancelledByAdmin,
-      AppointmentStatus.CancelledByClient,
-      AppointmentStatus.NoShow
-    ].includes(a.status)
-    );
-    
-    const availableSlots = allTimeSlots.filter(slot => {
-      const slotStart = new Date(slot.startTime);
-      const slotEnd = new Date(slot.endTime);
-      
-      // Check if the slot overlaps with any existing appointment
-      const isOverlapping = appointmentsOnDate.some(appointment => {
-        const appointmentStart = new Date(appointment.timeSlot.startTime);
-        const appointmentEnd = new Date(appointment.timeSlot.endTime);
-        
-        return (
-          (slotStart >= appointmentStart && slotStart < appointmentEnd) ||
-          (slotEnd > appointmentStart && slotEnd <= appointmentEnd) ||
-          (slotStart <= appointmentStart && slotEnd >= appointmentEnd)
-        );
-      });
-      
-      return !isOverlapping;
     });
+  }, [selectedDate, selectedService]);
+  
+  // const refreshAvailableTimeSlots = useCallback(() => {
+  //   if (!selectedDate) return;
     
-    setAvailableTimeSlots(availableSlots);
-  }, [selectedDate, selectedService, appointments, businessHours]);
+  //   const dayOfWeek = selectedDate.getDay();
+  //   const daySettings = businessHours.find(h => h.dayOfWeek === dayOfWeek);
+    
+  //   if (!daySettings || !daySettings.isOpen) {
+  //     setAvailableTimeSlots([]);
+  //     return;
+  //   }
+    
+  //   // Generate all possible time slots for the day
+  //   const duration = selectedService ? selectedService.duration : 30; // default to 30 minutes if no service selected
+  //   const allTimeSlots = generateTimeSlots(
+  //     selectedDate,
+  //     daySettings.openTime,
+  //     daySettings.closeTime,
+  //     duration
+  //   );
+    
+  //   // Filter out slots that overlap with existing appointments
+  //   const dateStr = selectedDate.toISOString().split('T')[0];
+  //   // const appointmentsOnDate = appointments.filter(
+  //   //   a => a.date.split('T')[0] === dateStr && a.status !== AppointmentStatus.CancelledByAdmin
+  //   // );
+  //   const appointmentsOnDate = appointments.filter(
+  //   a =>
+  //     a.date.split('T')[0] === dateStr &&
+  //     ![
+  //       AppointmentStatus.CancelledByAdmin,
+  //       AppointmentStatus.CancelledByClient,
+  //       AppointmentStatus.NoShow
+  //     ].includes(a.status)
+  //     );
+    
+  //   const availableSlots = allTimeSlots.filter(slot => {
+  //     const slotStart = new Date(slot.startTime);
+  //     const slotEnd = new Date(slot.endTime);
+      
+  //     // Check if the slot overlaps with any existing appointment
+  //     const isOverlapping = appointmentsOnDate.some(appointment => {
+  //       const appointmentStart = new Date(appointment.timeSlot.startTime);
+  //       const appointmentEnd = new Date(appointment.timeSlot.endTime);
+        
+  //       return (
+  //         (slotStart >= appointmentStart && slotStart < appointmentEnd) ||
+  //         (slotEnd > appointmentStart && slotEnd <= appointmentEnd) ||
+  //         (slotStart <= appointmentStart && slotEnd >= appointmentEnd)
+  //       );
+  //     });
+      
+  //     return !isOverlapping;
+  //   });
+    
+  //   setAvailableTimeSlots(availableSlots);
+  // }, [selectedDate, selectedService, appointments, businessHours]);
 
   useEffect(() => {
     refreshAvailableTimeSlots();
-  }, [refreshAvailableTimeSlots]);
+  }, [selectedDate, selectedService]);
 
   // Appointment operations
   // const addAppointment = useCallback((appointmentData: Omit<Appointment, 'id' | 'createdAt' | 'updatedAt'>) => {
