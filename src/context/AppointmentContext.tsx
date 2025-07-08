@@ -1,7 +1,5 @@
 import React, { createContext, useState, useEffect, useCallback, ReactNode } from 'react';
 import { Appointment, Service, BusinessHours, TimeSlot, AppointmentStatus } from '../types';
-// import * as storage from '../utils/storage';
-// import { generateTimeSlots } from '../utils/dateUtils';
 import { BusinessHoursResponse } from '../types';
 const API_URL = import.meta.env.VITE_API_URL;
 
@@ -41,16 +39,6 @@ export const AppointmentProvider: React.FC<AppointmentProviderProps> = ({ childr
   const [selectedService, setSelectedService] = useState<Service | null>(null);
   const [availableTimeSlots, setAvailableTimeSlots] = useState<TimeSlot[]>([]);
 
-  // Initialize data from localStorage
-  // useEffect(() => {
-  //   const storedAppointments = storage.getAppointments();
-  //   const storedServices = storage.getServices();
-  //   const storedBusinessHours = storage.getBusinessHours();
-    
-  //   setAppointments(storedAppointments);
-  //   setServices(storedServices);
-  //   setBusinessHours(storedBusinessHours);
-  // }, []);
   useEffect(() => {
   fetch(`${API_URL}/business-hours`)
   .then(res => res.json())
@@ -114,80 +102,11 @@ export const AppointmentProvider: React.FC<AppointmentProviderProps> = ({ childr
     });
   }, [selectedDate, selectedService]);
   
-  // const refreshAvailableTimeSlots = useCallback(() => {
-  //   if (!selectedDate) return;
-    
-  //   const dayOfWeek = selectedDate.getDay();
-  //   const daySettings = businessHours.find(h => h.dayOfWeek === dayOfWeek);
-    
-  //   if (!daySettings || !daySettings.isOpen) {
-  //     setAvailableTimeSlots([]);
-  //     return;
-  //   }
-    
-  //   // Generate all possible time slots for the day
-  //   const duration = selectedService ? selectedService.duration : 30; // default to 30 minutes if no service selected
-  //   const allTimeSlots = generateTimeSlots(
-  //     selectedDate,
-  //     daySettings.openTime,
-  //     daySettings.closeTime,
-  //     duration
-  //   );
-    
-  //   // Filter out slots that overlap with existing appointments
-  //   const dateStr = selectedDate.toISOString().split('T')[0];
-  //   // const appointmentsOnDate = appointments.filter(
-  //   //   a => a.date.split('T')[0] === dateStr && a.status !== AppointmentStatus.CancelledByAdmin
-  //   // );
-  //   const appointmentsOnDate = appointments.filter(
-  //   a =>
-  //     a.date.split('T')[0] === dateStr &&
-  //     ![
-  //       AppointmentStatus.CancelledByAdmin,
-  //       AppointmentStatus.CancelledByClient,
-  //       AppointmentStatus.NoShow
-  //     ].includes(a.status)
-  //     );
-    
-  //   const availableSlots = allTimeSlots.filter(slot => {
-  //     const slotStart = new Date(slot.startTime);
-  //     const slotEnd = new Date(slot.endTime);
-      
-  //     // Check if the slot overlaps with any existing appointment
-  //     const isOverlapping = appointmentsOnDate.some(appointment => {
-  //       const appointmentStart = new Date(appointment.timeSlot.startTime);
-  //       const appointmentEnd = new Date(appointment.timeSlot.endTime);
-        
-  //       return (
-  //         (slotStart >= appointmentStart && slotStart < appointmentEnd) ||
-  //         (slotEnd > appointmentStart && slotEnd <= appointmentEnd) ||
-  //         (slotStart <= appointmentStart && slotEnd >= appointmentEnd)
-  //       );
-  //     });
-      
-  //     return !isOverlapping;
-  //   });
-    
-  //   setAvailableTimeSlots(availableSlots);
-  // }, [selectedDate, selectedService, appointments, businessHours]);
-
   useEffect(() => {
     refreshAvailableTimeSlots();
   }, [selectedDate, selectedService]);
 
   // Appointment operations
-  // const addAppointment = useCallback((appointmentData: Omit<Appointment, 'id' | 'createdAt' | 'updatedAt'>) => {
-  //   const newAppointment: Appointment = {
-  //     ...appointmentData,
-  //     id: Math.random().toString(36).substring(2, 9),
-  //     createdAt: new Date().toISOString(),
-  //     updatedAt: new Date().toISOString()
-  //   };
-    
-  //   storage.saveAppointment(newAppointment);
-  //   setAppointments(prev => [...prev, newAppointment]);
-  //   return newAppointment;
-  // }, []);
   const addAppointment = useCallback(async (appointmentData: Omit<Appointment, 'id' | 'createdAt' | 'updatedAt'>) => {
   try {
     const response = await fetch(`${API_URL}/appointments`, {
@@ -209,10 +128,6 @@ export const AppointmentProvider: React.FC<AppointmentProviderProps> = ({ childr
   }
 }, []);
 
-  // const updateAppointment = useCallback((appointment: Appointment) => {
-  //   storage.saveAppointment(appointment);
-  //   setAppointments(prev => prev.map(a => a.id === appointment.id ? appointment : a));
-  // }, []);
   const updateAppointment = useCallback(async (appointment: Appointment) => {
   try {
     const response = await fetch(`${API_URL}/appointments/${appointment.id}`, {
@@ -238,10 +153,6 @@ export const AppointmentProvider: React.FC<AppointmentProviderProps> = ({ childr
     return appointments.find(a => a.id === id);
   }, [appointments]);
 
-  // const deleteAppointment = useCallback((id: string) => {
-  //   storage.deleteAppointment(id);
-  //   setAppointments(prev => prev.filter(a => a.id !== id));
-  // }, []);
   const deleteAppointment = useCallback(async (id: string) => {
   const appointment = getAppointment(id);
   if (appointment) {
@@ -261,13 +172,6 @@ export const AppointmentProvider: React.FC<AppointmentProviderProps> = ({ childr
   }
 }, [getAppointment, updateAppointment]);
 
-  
-
-  // const getAppointmentsByDate = useCallback((date: Date) => {
-  //   const dateStr = date.toISOString().split('T')[0];
-  //   return appointments.filter(a => a.date.split('T')[0] === dateStr);
-  // }, [appointments]);
-
   const getAppointmentsByDate = useCallback((date: Date) => {
   const dateStr = date.toISOString().split('T')[0];
 
@@ -277,16 +181,6 @@ export const AppointmentProvider: React.FC<AppointmentProviderProps> = ({ childr
 }, [appointments]);
 
   // Service operations
-  // const addService = useCallback((serviceData: Omit<Service, 'id'>) => {
-  //   const newService: Service = {
-  //     ...serviceData,
-  //     id: Math.random().toString(36).substring(2, 9)
-  //   };
-    
-  //   storage.saveService(newService);
-  //   setServices(prev => [...prev, newService]);
-  // }, []);
-
   const addService = useCallback(async (serviceData: Omit<Service, 'id'>) => {
   try {
     const response = await fetch(`${API_URL}/services`, {
@@ -307,10 +201,6 @@ export const AppointmentProvider: React.FC<AppointmentProviderProps> = ({ childr
   }
   }, []);
 
-  // const updateService = useCallback((service: Service) => {
-  //   storage.saveService(service);
-  //   setServices(prev => prev.map(s => s.id === service.id ? service : s));
-  // }, []);
   const updateService = useCallback(async (service: Service) => {
   try {
     const response = await fetch(`${API_URL}/services/${service.id}`, {
@@ -331,11 +221,6 @@ export const AppointmentProvider: React.FC<AppointmentProviderProps> = ({ childr
   }
   }, []);
 
-
-  // const removeService = useCallback((id: string) => {
-  //   storage.deleteService(id);
-  //   setServices(prev => prev.filter(s => s.id !== id));
-  // }, []);
   const removeService = useCallback(async (id: string) => {
   try {
     const response = await fetch(`${API_URL}/services/${id}`, {
@@ -354,13 +239,9 @@ export const AppointmentProvider: React.FC<AppointmentProviderProps> = ({ childr
 }, []);
 
   // Business hours operations
-  // const updateBusinessHours = useCallback((hours: BusinessHours[]) => {
-  //   storage.saveBusinessHours(hours);
-  //   setBusinessHours(hours);
-  // }, []);
   const updateBusinessHours = useCallback(async (hours: BusinessHours[]) => {
   try {
-    const response = await fetch(`${API_URL}/appointments`, {
+    const response = await fetch(`${API_URL}/business-hours`, {
       method: 'PUT',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(hours)
