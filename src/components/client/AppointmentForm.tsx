@@ -32,6 +32,7 @@ const AppointmentForm: React.FC<AppointmentFormProps> = ({
     clientName?: string;
     clientEmail?: string;
     clientPhone?: string;
+    clientCpf?: string;
   }>({});
 
   // Format date and time for display
@@ -54,10 +55,15 @@ const AppointmentForm: React.FC<AppointmentFormProps> = ({
       clientName?: string;
       clientEmail?: string;
       clientPhone?: string;
+      clientCpf?: string;
     } = {};
     
     if (!clientName.trim()) {
       newErrors.clientName = 'Name is required';
+    }
+
+    if (!clientCpf.trim()) {
+      newErrors.clientCpf = 'CPF is required';
     }
     
     if (!clientEmail.trim()) {
@@ -74,30 +80,6 @@ const AppointmentForm: React.FC<AppointmentFormProps> = ({
     return Object.keys(newErrors).length === 0;
   };
 
-  // Submit form
-  // const handleSubmit = (e: React.FormEvent) => {
-  //   e.preventDefault();
-    
-  //   if (!validateForm()) return;
-    
-  //   setIsSubmitting(true);
-    
-  //   // Create appointment
-  //   addAppointment({
-  //     clientName,
-  //     clientEmail,
-  //     clientPhone,
-  //     serviceId: selectedService.id,
-  //     date: selectedDate.toISOString(),
-  //     timeSlot: selectedTimeSlot,
-  //     status: 'pending',
-  //     notes
-  //   });
-    
-  //   setIsSubmitting(false);
-  //   onSuccess();
-  // };
-
   const handleSubmit = async (e: React.FormEvent) => {
   e.preventDefault();
 
@@ -113,6 +95,7 @@ const AppointmentForm: React.FC<AppointmentFormProps> = ({
         client_name: clientName,
         client_email: clientEmail,
         client_phone: clientPhone,
+        client_cpf: clientCpf,
         service_id: selectedService.id,
         date: selectedDate.toISOString().split('T')[0],
         time_start: selectedTimeSlot.startTime.split('T')[1],
